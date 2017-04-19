@@ -14,6 +14,7 @@ struct
 } sensor;
 
 bc_led_t led;
+bc_button_t button;
 bc_module_sigfox_t sigfox_module;
 bc_tag_temperature_t temperature_tag_internal;
 bc_tag_temperature_t temperature_tag;
@@ -122,6 +123,17 @@ void timer_task(void *param)
 	}
 }
 
+void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
+{
+    (void) self;
+    (void) event_param;
+
+    if (event == BC_BUTTON_EVENT_HOLD)
+    {
+        bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
+    }
+}
+
 void application_init(void)
 {
     memset(&sensor, 0, sizeof(sensor));
@@ -153,6 +165,10 @@ void application_init(void)
     bc_tag_barometer_init(&barometer_tag, BC_I2C_I2C0);
     bc_tag_barometer_set_update_interval(&barometer_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
     bc_tag_barometer_set_event_handler(&barometer_tag, barometer_tag_event_handler, NULL);
+
+    bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
+    bc_button_set_hold_time(&button, 10000);
+    bc_button_set_event_handler(&button, button_event_handler, NULL);
 
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
