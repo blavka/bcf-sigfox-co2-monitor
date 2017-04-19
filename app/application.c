@@ -13,6 +13,7 @@ struct
 
 } sensor;
 
+bc_scheduler_task_id_t timer_task_id;
 bc_led_t led;
 bc_button_t button;
 bc_module_sigfox_t sigfox_module;
@@ -128,7 +129,11 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     (void) self;
     (void) event_param;
 
-    if (event == BC_BUTTON_EVENT_HOLD)
+    if (event == BC_BUTTON_EVENT_CLICK)
+    {
+        bc_scheduler_plan_now(timer_task_id);
+    }
+    else if (event == BC_BUTTON_EVENT_HOLD)
     {
         bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
     }
@@ -172,5 +177,5 @@ void application_init(void)
 
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
-    bc_scheduler_register(timer_task, NULL, FIRST_REPORT_SECONDS * 1000);
+    timer_task_id = bc_scheduler_register(timer_task, NULL, FIRST_REPORT_SECONDS * 1000);
 }
