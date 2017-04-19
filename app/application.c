@@ -134,9 +134,9 @@ void application_init(void)
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
-    //bc_module_co2_init();
-    //bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    //bc_module_co2_set_event_handler(co2_module_event_handler, NULL);
+    bc_module_co2_init();
+    bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
+    bc_module_co2_set_event_handler(co2_module_event_handler, NULL);
 
     bc_tag_temperature_init(&temperature_tag_internal, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_ALTERNATE);
     bc_tag_temperature_set_update_interval(&temperature_tag_internal, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
