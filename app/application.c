@@ -57,7 +57,7 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
     (void) event;
     (void) event_param;
 
-    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+    bc_data_stream_t *stream = (bc_data_stream_t *) event_param;
 
     float value;
 
@@ -75,7 +75,7 @@ void temperature_tag_event_handler(bc_tag_temperature_t *self, bc_tag_temperatur
 {
     (void) event;
 
-    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+    bc_data_stream_t *stream = (bc_data_stream_t *) event_param;
 
     float value;
 
@@ -93,9 +93,8 @@ void temperature_tag_event_handler(bc_tag_temperature_t *self, bc_tag_temperatur
 void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t event, void *event_param)
 {
     (void) event;
-    (void) event_param;
 
-    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+    bc_data_stream_t *stream = (bc_data_stream_t *) event_param;
 
     float value;
 
@@ -112,9 +111,8 @@ void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t
 void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_event_t event, void *event_param)
 {
     (void) event;
-    (void) event_param;
 
-    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+    bc_data_stream_t *stream = (bc_data_stream_t *) event_param;
 
     float value;
 
@@ -148,7 +146,6 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 void application_init(void)
 {
     bc_led_init(&led, BC_GPIO_LED, false, false);
-    bc_led_set_mode(&led, BC_LED_MODE_ON);
 
     bc_module_battery_init(BC_MODULE_BATTERY_FORMAT_STANDARD);
 
@@ -183,8 +180,6 @@ void application_init(void)
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
     bc_button_set_hold_time(&button, 10000);
     bc_button_set_event_handler(&button, button_event_handler, NULL);
-
-    bc_led_set_mode(&led, BC_LED_MODE_OFF);
 }
 
 void application_task(void *param)
@@ -196,6 +191,7 @@ void application_task(void *param)
     uint8_t humidity = 0;
     uint16_t pressure = 0;
     uint16_t co2_concentration = 0;
+    uint16_t co2_concentration_median = 0;
 
     float avarage;
 
@@ -219,7 +215,21 @@ void application_task(void *param)
         header |= 0x08; co2_concentration = avarage;
     }
 
-    uint8_t buffer[8];
+    float median;
+
+    if (bc_data_stream_get_median(&stream_co2_concentration, &median))
+    {
+        header |= 0x10; co2_concentration_median = median;
+    }
+
+    float raw;
+
+    if (bc_data_stream_get_last(&stream_co2_concentration, &raw))
+    {
+        header |= 0x20; co2_concentration_median = raw;
+    }
+
+    uint8_t buffer[12];
 
     buffer[0] = header;
     buffer[1] = temperature;
@@ -229,6 +239,10 @@ void application_task(void *param)
     buffer[5] = pressure >> 8;
     buffer[6] = co2_concentration;
     buffer[7] = co2_concentration >> 8;
+    buffer[8] = co2_concentration_median;
+    buffer[9] = co2_concentration_median >> 8;
+    buffer[10] = co2_concentration_raw;
+    buffer[11] = co2_concentration_raw >> 8;
 
     if (bc_module_sigfox_send_rf_frame(&sigfox_module, buffer, sizeof(buffer)))
     {
