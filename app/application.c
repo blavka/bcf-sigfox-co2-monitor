@@ -5,15 +5,6 @@
 #define REGULAR_REPORT_SECONDS (15 * 60)
 #define CALIBRATION_DELAY_SECONDS (10 * 60)
 
-struct
-{
-    struct { bool valid; float value; } temperature;
-    struct { bool valid; float value; } humidity;
-    struct { bool valid; float value; } pressure;
-    struct { bool valid; float value; } co2_concentration;
-
-} sensor;
-
 bc_led_t led;
 bc_button_t button;
 bc_module_sigfox_t sigfox_module;
@@ -21,6 +12,15 @@ bc_tag_temperature_t temperature_tag_internal;
 bc_tag_temperature_t temperature_tag;
 bc_tag_barometer_t barometer_tag;
 bc_tag_humidity_t humidity_tag;
+
+BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_temperature_tag, 8)
+bc_data_stream_t stream_temperature_tag;
+BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_barometer_tag, 8)
+bc_data_stream_t stream_barometer_tag;
+BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_humidity_tag, 8)
+bc_data_stream_t stream_humidity_tag;
+BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_co2_concentration, 8)
+bc_data_stream_t stream_co2_concentration;
 
 void calibration_task(void *param)
 {
@@ -57,15 +57,37 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
     (void) event;
     (void) event_param;
 
-    sensor.co2_concentration.valid = bc_module_co2_get_concentration(&sensor.co2_concentration.value);
+    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+
+    float value;
+
+    if (bc_module_co2_get_concentration(&value))
+    {
+        bc_data_stream_feed(stream, &value);
+    }
+    else
+    {
+        bc_data_stream_reset(stream);
+    }
 }
 
 void temperature_tag_event_handler(bc_tag_temperature_t *self, bc_tag_temperature_event_t event, void *event_param)
 {
     (void) event;
-    (void) event_param;
 
-    sensor.temperature.valid = bc_tag_temperature_get_temperature_celsius(self, &sensor.temperature.value);
+    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+
+    float value;
+
+    if (bc_tag_temperature_get_temperature_celsius(self, &value))
+    {
+        bc_data_stream_feed(stream, &value);
+    }
+    else
+    {
+        bc_data_stream_reset(stream);
+    }
+
 }
 
 void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t event, void *event_param)
@@ -73,7 +95,18 @@ void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t
     (void) event;
     (void) event_param;
 
-    sensor.humidity.valid = bc_tag_humidity_get_humidity_percentage(self, &sensor.humidity.value);
+    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+
+    float value;
+
+    if (bc_tag_humidity_get_humidity_percentage(self, &value))
+    {
+        bc_data_stream_feed(stream, &value);
+    }
+    else
+    {
+        bc_data_stream_reset(stream);
+    }
 }
 
 void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_event_t event, void *event_param)
@@ -81,7 +114,18 @@ void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_even
     (void) event;
     (void) event_param;
 
-    sensor.pressure.valid = bc_tag_barometer_get_pressure_pascal(self, &sensor.pressure.value);
+    bc_data_stream_t *stream = (bc_data_stream_t *)event_param;
+
+    float value;
+
+    if (bc_tag_barometer_get_pressure_pascal(self, &value))
+    {
+        bc_data_stream_feed(stream, &value);
+    }
+    else
+    {
+        bc_data_stream_reset(stream);
+    }
 }
 
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
@@ -103,8 +147,6 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 
 void application_init(void)
 {
-    memset(&sensor, 0, sizeof(sensor));
-
     bc_led_init(&led, BC_GPIO_LED, false, false);
     bc_led_set_mode(&led, BC_LED_MODE_ON);
 
@@ -113,9 +155,14 @@ void application_init(void)
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
+    bc_data_stream_init(&stream_temperature_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_temperature_tag, sizeof(stram_buffer_temperature_tag));
+    bc_data_stream_init(&stream_barometer_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_barometer_tag, sizeof(stram_buffer_barometer_tag));
+    bc_data_stream_init(&stream_humidity_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_humidity_tag, sizeof(stram_buffer_humidity_tag));
+    bc_data_stream_init(&stream_co2_concentration, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_co2_concentration, sizeof(stram_buffer_co2_concentration));
+
     bc_module_co2_init();
     bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    bc_module_co2_set_event_handler(co2_module_event_handler, NULL);
+    bc_module_co2_set_event_handler(co2_module_event_handler, &stream_co2_concentration);
 
     bc_tag_temperature_init(&temperature_tag_internal, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_ALTERNATE);
     bc_tag_temperature_set_update_interval(&temperature_tag_internal, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
@@ -123,15 +170,15 @@ void application_init(void)
 
     bc_tag_temperature_init(&temperature_tag, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_DEFAULT);
     bc_tag_temperature_set_update_interval(&temperature_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    bc_tag_temperature_set_event_handler(&temperature_tag, temperature_tag_event_handler, NULL);
+    bc_tag_temperature_set_event_handler(&temperature_tag, temperature_tag_event_handler, &stream_temperature_tag);
 
     bc_tag_humidity_init(&humidity_tag, BC_TAG_HUMIDITY_REVISION_R2, BC_I2C_I2C0, BC_TAG_HUMIDITY_I2C_ADDRESS_DEFAULT);
     bc_tag_humidity_set_update_interval(&humidity_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    bc_tag_humidity_set_event_handler(&humidity_tag, humidity_tag_event_handler, NULL);
+    bc_tag_humidity_set_event_handler(&humidity_tag, humidity_tag_event_handler, &stream_humidity_tag);
 
     bc_tag_barometer_init(&barometer_tag, BC_I2C_I2C0);
     bc_tag_barometer_set_update_interval(&barometer_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    bc_tag_barometer_set_event_handler(&barometer_tag, barometer_tag_event_handler, NULL);
+    bc_tag_barometer_set_event_handler(&barometer_tag, barometer_tag_event_handler, &stream_barometer_tag);
 
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
     bc_button_set_hold_time(&button, 10000);
@@ -150,24 +197,26 @@ void application_task(void *param)
     uint16_t pressure = 0;
     uint16_t co2_concentration = 0;
 
-    if (sensor.temperature.valid)
+    float avarage;
+
+    if (bc_data_stream_get_average(&stream_temperature_tag, &avarage))
     {
-        header |= 0x01; temperature = sensor.temperature.value * 2;
+        header |= 0x01; temperature = avarage * 2;
     }
 
-    if (sensor.humidity.valid)
+    if (bc_data_stream_get_average(&stream_humidity_tag, &avarage))
     {
-        header |= 0x02; humidity = sensor.humidity.value * 2;
+        header |= 0x02; humidity = avarage * 2;
     }
 
-    if (sensor.pressure.valid)
+    if (bc_data_stream_get_average(&stream_barometer_tag, &avarage))
     {
-        header |= 0x04; pressure = sensor.pressure.value / 2;
+        header |= 0x04; pressure = avarage / 2;
     }
 
-    if (sensor.co2_concentration.valid)
+    if (bc_data_stream_get_average(&stream_co2_concentration, &avarage))
     {
-        header |= 0x08; co2_concentration = sensor.co2_concentration.value;
+        header |= 0x08; co2_concentration = avarage;
     }
 
     uint8_t buffer[8];
