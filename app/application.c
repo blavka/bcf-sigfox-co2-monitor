@@ -1,8 +1,9 @@
 #include <application.h>
 
-#define SENSOR_UPDATE_INTERVAL_SECONDS 30
+#define SENSOR_UPDATE_INTERVAL_SECONDS 120
 #define FIRST_REPORT_SECONDS 60
-#define REGULAR_REPORT_SECONDS (15 * 60)
+#define REGULAR_REPORT_SECONDS (15 * 60)
+#define CALIBRATION_DELAY_SECONDS (10 * 60)
 
 struct
 {
@@ -13,7 +14,6 @@ struct
 
 } sensor;
 
-bc_scheduler_task_id_t timer_task_id;
 bc_led_t led;
 bc_button_t button;
 bc_module_sigfox_t sigfox_module;
@@ -21,6 +21,17 @@ bc_tag_temperature_t temperature_tag_internal;
 bc_tag_temperature_t temperature_tag;
 bc_tag_barometer_t barometer_tag;
 bc_tag_humidity_t humidity_tag;
+
+void calibration_task(void *param)
+{
+    (void) param;
+
+    bc_led_set_mode(&led, BC_LED_MODE_OFF);
+
+    bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
+
+    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
+}
 
 void sigfox_module_event_handler(bc_module_sigfox_t *self, bc_module_sigfox_event_t event, void *event_param)
 {
@@ -73,69 +84,6 @@ void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_even
     sensor.pressure.valid = bc_tag_barometer_get_pressure_pascal(self, &sensor.pressure.value);
 }
 
-void timer_task(void *param)
-{
-    (void) param;
-
-	uint8_t header = 0;
-    int16_t temperature = 0;
-	uint8_t humidity = 0;
-	uint16_t pressure = 0;
-    uint16_t co2_concentration = 0;
-
-	if (sensor.temperature.valid)
-	{
-		header |= 0x01; temperature = sensor.temperature.value * 2;
-	}
-
-	if (sensor.humidity.valid)
-	{
-		header |= 0x02; humidity = sensor.humidity.value * 2;
-	}
-
-	if (sensor.pressure.valid)
-	{
-        header |= 0x04; pressure = sensor.pressure.value / 2;
-	}
-
-    if (sensor.co2_concentration.valid)
-	{
-        header |= 0x08; co2_concentration = sensor.co2_concentration.value;
-	}
-
-    uint8_t buffer[8];
-
-    buffer[0] = header;
-    buffer[1] = temperature;
-    buffer[2] = temperature >> 8;
-    buffer[3] = humidity;
-    buffer[4] = pressure;
-    buffer[5] = pressure >> 8;
-    buffer[6] = co2_concentration;
-    buffer[7] = co2_concentration >> 8;
-
-	if (bc_module_sigfox_send_rf_frame(&sigfox_module, buffer, sizeof(buffer)))
-	{
-		bc_scheduler_plan_current_relative(15 * 60 * 1000);
-	}
-	else
-	{
-		bc_scheduler_plan_current_relative(1000);
-	}
-}
-#define BC_DATA_STREAM_FLOAT_BUFFER(NAME, NUMBER_OF_SAMPLES) \
-    float NAME##_feed[NUMBER_OF_SAMPLES]; \
-    float NAME##_sort[NUMBER_OF_SAMPLES]; \
-    bc_data_stream_buffer_t NAME = {.feed = NAME##_feed, .sort = NAME##_sort, .max_number_of_samples = NUMBER_OF_SAMPLES};
-void calibration_task(void *param)
-{
-    (void) param;
-
-    bc_led_set_mode(&led, BC_LED_MODE_OFF);
-    bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
-    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
-}
-
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
 {
     (void) self;
@@ -143,12 +91,13 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 
     if (event == BC_BUTTON_EVENT_CLICK)
     {
-        bc_scheduler_plan_now(timer_task_id);
+        bc_scheduler_plan_now(0);
     }
     else if (event == BC_BUTTON_EVENT_HOLD)
     {
         bc_led_set_mode(&led, BC_LED_MODE_BLINK);
-        bc_scheduler_register(calibration_task, NULL, 5 * 60 * 1000);
+
+        bc_scheduler_register(calibration_task, NULL, CALIBRATION_DELAY_SECONDS * 1000);
     }
 }
 
@@ -189,6 +138,55 @@ void application_init(void)
     bc_button_set_event_handler(&button, button_event_handler, NULL);
 
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
+}
 
-    timer_task_id = bc_scheduler_register(timer_task, NULL, FIRST_REPORT_SECONDS * 1000);
+void application_task(void *param)
+{
+    (void) param;
+
+    uint8_t header = 0;
+    int16_t temperature = 0;
+    uint8_t humidity = 0;
+    uint16_t pressure = 0;
+    uint16_t co2_concentration = 0;
+
+    if (sensor.temperature.valid)
+    {
+        header |= 0x01; temperature = sensor.temperature.value * 2;
+    }
+
+    if (sensor.humidity.valid)
+    {
+        header |= 0x02; humidity = sensor.humidity.value * 2;
+    }
+
+    if (sensor.pressure.valid)
+    {
+        header |= 0x04; pressure = sensor.pressure.value / 2;
+    }
+
+    if (sensor.co2_concentration.valid)
+    {
+        header |= 0x08; co2_concentration = sensor.co2_concentration.value;
+    }
+
+    uint8_t buffer[8];
+
+    buffer[0] = header;
+    buffer[1] = temperature;
+    buffer[2] = temperature >> 8;
+    buffer[3] = humidity;
+    buffer[4] = pressure;
+    buffer[5] = pressure >> 8;
+    buffer[6] = co2_concentration;
+    buffer[7] = co2_concentration >> 8;
+
+    if (bc_module_sigfox_send_rf_frame(&sigfox_module, buffer, sizeof(buffer)))
+    {
+        bc_scheduler_plan_current_relative(REGULAR_REPORT_SECONDS * 1000);
+    }
+    else
+    {
+        bc_scheduler_plan_current_relative(1000);
+    }
 }
