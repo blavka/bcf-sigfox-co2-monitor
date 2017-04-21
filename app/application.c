@@ -4,6 +4,8 @@
 #define FIRST_REPORT_SECONDS 60
 #define REGULAR_REPORT_SECONDS (15 * 60)
 #define CALIBRATION_DELAY_SECONDS (10 * 60)
+#define OOB_CO2_CONCENTRATION 100
+#define APPLICATION_TASK_ID 0
 
 bc_led_t led;
 bc_button_t button;
@@ -63,6 +65,21 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
 
     if (bc_module_co2_get_concentration(&value))
     {
+        float average;
+        if (bc_data_stream_get_average(stream, &average))
+        {
+            if (abs(value - average) > OOB_CO2_CONCENTRATION)
+            {
+                float last_value;
+                bc_data_stream_get_last(stream, &last_value);
+
+                if (abs(last_value - average) > OOB_CO2_CONCENTRATION)
+                {
+                    bc_scheduler_plan_now(APPLICATION_TASK_ID);
+                }
+            }
+        }
+
         bc_data_stream_feed(stream, &value);
     }
     else
