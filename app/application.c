@@ -192,6 +192,7 @@ void application_task(void *param)
     uint16_t pressure = 0;
     uint16_t co2_concentration = 0;
     uint16_t co2_concentration_median = 0;
+    uint16_t co2_concentration_raw = 0;
 
     float avarage;
 
@@ -226,7 +227,7 @@ void application_task(void *param)
 
     if (bc_data_stream_get_last(&stream_co2_concentration, &raw))
     {
-        header |= 0x20; co2_concentration_median = raw;
+        header |= 0x20; co2_concentration_raw = raw;
     }
 
     uint8_t buffer[12];
