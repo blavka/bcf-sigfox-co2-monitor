@@ -13,13 +13,13 @@ bc_tag_temperature_t temperature_tag;
 bc_tag_barometer_t barometer_tag;
 bc_tag_humidity_t humidity_tag;
 
-BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_temperature_tag, 8)
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_temperature_tag, 8)
 bc_data_stream_t stream_temperature_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_barometer_tag, 8)
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_barometer_tag, 8)
 bc_data_stream_t stream_barometer_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_humidity_tag, 8)
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_humidity_tag, 8)
 bc_data_stream_t stream_humidity_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stram_buffer_co2_concentration, 8)
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_co2_concentration, 8)
 bc_data_stream_t stream_co2_concentration;
 
 void calibration_task(void *param)
@@ -152,10 +152,10 @@ void application_init(void)
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
-    bc_data_stream_init(&stream_temperature_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_temperature_tag, sizeof(stram_buffer_temperature_tag));
-    bc_data_stream_init(&stream_barometer_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_barometer_tag, sizeof(stram_buffer_barometer_tag));
-    bc_data_stream_init(&stream_humidity_tag, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_humidity_tag, sizeof(stram_buffer_humidity_tag));
-    bc_data_stream_init(&stream_co2_concentration, BC_DATA_STREAM_TYPE_FLOAT, stram_buffer_co2_concentration, sizeof(stram_buffer_co2_concentration));
+    bc_data_stream_init(&stream_temperature_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_temperature_tag, sizeof(stream_buffer_temperature_tag));
+    bc_data_stream_init(&stream_barometer_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_barometer_tag, sizeof(stream_buffer_barometer_tag));
+    bc_data_stream_init(&stream_humidity_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_humidity_tag, sizeof(stream_buffer_humidity_tag));
+    bc_data_stream_init(&stream_co2_concentration, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_co2_concentration, sizeof(stream_buffer_co2_concentration));
 
     bc_module_co2_init();
     bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
