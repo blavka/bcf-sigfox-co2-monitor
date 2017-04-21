@@ -123,6 +123,18 @@ void timer_task(void *param)
 		bc_scheduler_plan_current_relative(1000);
 	}
 }
+#define BC_DATA_STREAM_FLOAT_BUFFER(NAME, NUMBER_OF_SAMPLES) \
+    float NAME##_feed[NUMBER_OF_SAMPLES]; \
+    float NAME##_sort[NUMBER_OF_SAMPLES]; \
+    bc_data_stream_buffer_t NAME = {.feed = NAME##_feed, .sort = NAME##_sort, .max_number_of_samples = NUMBER_OF_SAMPLES};
+void calibration_task(void *param)
+{
+    (void) param;
+
+    bc_led_set_mode(&led, BC_LED_MODE_OFF);
+    bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
+    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
+}
 
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
 {
@@ -135,7 +147,8 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     }
     else if (event == BC_BUTTON_EVENT_HOLD)
     {
-        bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
+        bc_led_set_mode(&led, BC_LED_MODE_BLINK);
+        bc_scheduler_register(calibration_task, NULL, 5 * 60 * 1000);
     }
 }
 
