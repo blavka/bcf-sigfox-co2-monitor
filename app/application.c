@@ -73,11 +73,12 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
             {
                 float last_value;
 
-                bc_data_stream_get_last(stream, &last_value);
-
-                if (abs(last_value - average) > OOB_CO2_CONCENTRATION)
+                if (bc_data_stream_get_last(stream, &last_value))
                 {
-                    bc_scheduler_plan_now(APPLICATION_TASK_ID);
+                    if (abs(last_value - average) > OOB_CO2_CONCENTRATION)
+                    {
+                        bc_scheduler_plan_now(APPLICATION_TASK_ID);
+                    }
                 }
             }
         }
