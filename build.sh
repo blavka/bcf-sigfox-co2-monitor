@@ -1,4 +1,5 @@
-#!/bin/bash
-set -eu -o xtrace
+#!/bin/sh
 
-make release
+set -eux
+
+make
