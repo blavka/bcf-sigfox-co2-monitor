@@ -66,11 +66,13 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
     if (bc_module_co2_get_concentration(&value))
     {
         float average;
+
         if (bc_data_stream_get_average(stream, &average))
         {
             if (abs(value - average) > OOB_CO2_CONCENTRATION)
             {
                 float last_value;
+
                 bc_data_stream_get_last(stream, &last_value);
 
                 if (abs(last_value - average) > OOB_CO2_CONCENTRATION)
@@ -156,7 +158,7 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     {
         bc_led_set_mode(&led, BC_LED_MODE_BLINK);
 
-        bc_scheduler_register(calibration_task, NULL, CALIBRATION_DELAY_SECONDS * 1000);
+        bc_scheduler_register(calibration_task, NULL, bc_tick_get() + CALIBRATION_DELAY_SECONDS * 1000);
     }
 }
 
