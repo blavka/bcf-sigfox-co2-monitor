@@ -11,6 +11,7 @@
 
 This repository contains firmware for Sigfox CO2 Monitor.
 Firmware is programmed into [Core Module](https://shop.bigclown.com/products/core-module).
+
 **TODO** Binary version is available in section [Releases](https://github.com/bigclownlabs/bcp-sigfox-co2/releases).
 
 **TODO** > Detailed information about this project can be found in [BigClown Documentation](https://doc.bigclown.com).
@@ -41,6 +42,8 @@ The following hardware components are used for this project:
 * **[Sigfox Module](https://shop.bigclown.com/products/sigfox-module)**
 * **[Core Module](https://shop.bigclown.com/products/core-module)**
 * **[Battery Module](https://shop.bigclown.com/products/battery-module)**
+
+**TODO** Link to enclosure cad files.
 
 ![sigfox-climate-station](images/sf-co2.png)
 
