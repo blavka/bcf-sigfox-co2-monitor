@@ -1,6 +1,7 @@
 #include <application.h>
 
 #define SENSOR_UPDATE_INTERVAL_SECONDS 120
+#define SENSOR_DATA_STREAM_SAMPLES 8
 #define FIRST_REPORT_SECONDS 60
 #define REGULAR_REPORT_SECONDS (15 * 60)
 #define CALIBRATION_DELAY_SECONDS (10 * 60)
@@ -15,13 +16,16 @@ bc_tag_temperature_t temperature_tag;
 bc_tag_barometer_t barometer_tag;
 bc_tag_humidity_t humidity_tag;
 
-BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_temperature_tag, 8)
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_temperature_tag, SENSOR_DATA_STREAM_SAMPLES)
 bc_data_stream_t stream_temperature_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_barometer_tag, 8)
+
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_barometer_tag, SENSOR_DATA_STREAM_SAMPLES)
 bc_data_stream_t stream_barometer_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_humidity_tag, 8)
+
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_humidity_tag, SENSOR_DATA_STREAM_SAMPLES)
 bc_data_stream_t stream_humidity_tag;
-BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_co2_concentration, 8)
+
+BC_DATA_STREAM_FLOAT_BUFFER(stream_buffer_co2_concentration, SENSOR_DATA_STREAM_SAMPLES)
 bc_data_stream_t stream_co2_concentration;
 
 void calibration_task(void *param)
@@ -172,10 +176,10 @@ void application_init(void)
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
-    bc_data_stream_init(&stream_temperature_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_temperature_tag, sizeof(stream_buffer_temperature_tag));
-    bc_data_stream_init(&stream_barometer_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_barometer_tag, sizeof(stream_buffer_barometer_tag));
-    bc_data_stream_init(&stream_humidity_tag, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_humidity_tag, sizeof(stream_buffer_humidity_tag));
-    bc_data_stream_init(&stream_co2_concentration, BC_DATA_STREAM_TYPE_FLOAT, stream_buffer_co2_concentration, sizeof(stream_buffer_co2_concentration));
+    bc_data_stream_init(&stream_temperature_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_temperature_tag);
+    bc_data_stream_init(&stream_barometer_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_barometer_tag);
+    bc_data_stream_init(&stream_humidity_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_humidity_tag);
+    bc_data_stream_init(&stream_co2_concentration, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_co2_concentration);
 
     bc_module_co2_init();
     bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
@@ -189,7 +193,7 @@ void application_init(void)
     bc_tag_temperature_set_update_interval(&temperature_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
     bc_tag_temperature_set_event_handler(&temperature_tag, temperature_tag_event_handler, &stream_temperature_tag);
 
-    bc_tag_humidity_init(&humidity_tag, BC_TAG_HUMIDITY_REVISION_R2, BC_I2C_I2C0, BC_TAG_HUMIDITY_I2C_ADDRESS_DEFAULT);
+    bc_tag_humidity_init(&humidity_tag, BC_TAG_HUMIDITY_REVISION_R3, BC_I2C_I2C0, BC_TAG_HUMIDITY_I2C_ADDRESS_DEFAULT);
     bc_tag_humidity_set_update_interval(&humidity_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
     bc_tag_humidity_set_event_handler(&humidity_tag, humidity_tag_event_handler, &stream_humidity_tag);
 
