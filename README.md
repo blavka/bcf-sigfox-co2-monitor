@@ -1,6 +1,6 @@
 <a href="https://www.bigclown.com"><img src="https://s3.eu-central-1.amazonaws.com/bigclown/gh-readme-logo.png" alt="BigClown Logo" align="right"></a>
 
-# Project Sigfox CO2 Monitor
+# Firmware for BigClown Sigfox CO2 Monitor
 
 [![Travis](https://img.shields.io/travis/bigclownlabs/bcp-sigfox-co2/master.svg)](https://travis-ci.org/bigclownlabs/bcp-sigfox-co2)
 [![Release](https://img.shields.io/github/release/bigclownlabs/bcp-sigfox-co2.svg)](https://github.com/bigclownlabs/bcp-sigfox-co2/releases)
