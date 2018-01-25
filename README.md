@@ -10,8 +10,8 @@
 ![sigfox-CO2-monitor-with-enclosure](images/sf-co2-enclosure.png)
 
 This repository contains firmware for Sigfox CO2 Monitor.
-Firmware is programmed into [Core Module](https://shop.bigclown.com/products/core-module).
-Binary version is available in section [Releases](https://github.com/bigclownlabs/bcp-sigfox-co2/releases).
+Firmware is programmed into [Core Module](https://shop.bigclown.com/core-module).
+Binary version is available in section [Releases](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/releases).
 
 **TODO** > Detailed information about this project can be found in [BigClown Documentation](https://doc.bigclown.com).
 
