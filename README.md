@@ -34,13 +34,13 @@ You can route sensor data as HTTP POST request with JSON body to your own web ap
 
 The following hardware components are used for this project:
 
-* **[CO2 Module](https://shop.bigclown.com/products/co2-module)**
-* **[Temperature Tag](https://shop.bigclown.com/products/temperature-tag)**
-* **[Humidity Tag](https://shop.bigclown.com/products/humidity-tag)**
-* **[Barometer Tag](https://shop.bigclown.com/products/barometr-tag)**
-* **[Sigfox Module](https://shop.bigclown.com/products/sigfox-module)**
-* **[Core Module](https://shop.bigclown.com/products/core-module)**
-* **[Battery Module](https://shop.bigclown.com/products/battery-module)**
+* **[CO2 Module](https://shop.bigclown.com/co2-module)**
+* **[Temperature Tag](https://shop.bigclown.com/temperature-tag)**
+* **[Humidity Tag](https://shop.bigclown.com/humidity-tag)**
+* **[Barometer Tag](https://shop.bigclown.com/barometr-tag)**
+* **[Sigfox Module](https://shop.bigclown.com/sigfox-module)**
+* **[Core Module](https://shop.bigclown.com/core-module)**
+* **[Battery Module](https://shop.bigclown.com/battery-module)**
 
 **TODO** Link to enclosure cad files.
 
