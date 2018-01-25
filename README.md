@@ -37,7 +37,7 @@ The following hardware components are used for this project:
 * **[CO2 Module](https://shop.bigclown.com/co2-module)**
 * **[Temperature Tag](https://shop.bigclown.com/temperature-tag)**
 * **[Humidity Tag](https://shop.bigclown.com/humidity-tag)**
-* **[Barometer Tag](https://shop.bigclown.com/barometr-tag)**
+* **[Barometer Tag](https://shop.bigclown.com/barometer-tag)**
 * **[Sigfox Module](https://shop.bigclown.com/sigfox-module)**
 * **[Core Module](https://shop.bigclown.com/core-module)**
 * **[Battery Module](https://shop.bigclown.com/battery-module)**
