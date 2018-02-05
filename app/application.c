@@ -34,7 +34,7 @@ void calibration_task(void *param)
 
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
-    bc_module_co2_calibration(BC_MODULE_CO2_CALIBRATION_BACKGROUND_FILTERED);
+    bc_module_co2_calibration(BC_LP8_CALIBRATION_BACKGROUND_FILTERED);
 
     bc_scheduler_unregister(bc_scheduler_get_current_task_id());
 }
@@ -67,7 +67,7 @@ void co2_module_event_handler(bc_module_co2_event_t event, void *event_param)
 
     float value;
 
-    if (bc_module_co2_get_concentration(&value))
+    if (bc_module_co2_get_concentration_ppm(&value))
     {
         float average;
 
