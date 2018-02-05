@@ -7,19 +7,19 @@ addons:
     sources:
     - sourceline: 'ppa:team-gcc-arm-embedded/ppa'
     packages:
-    - gcc-arm-embedded=6-2017q1-1*
+    - gcc-arm-embedded
 
-script: ./build.sh
-
+script:
+  - make release OUT=bcf-kit-sigfox-co2-monitor-${TRAVIS_TAG} VERSION=${TRAVIS_TAG}
+  - cp decode.py out/release/bcf-kit-sigfox-co2-monitor-${TRAVIS_TAG}.py
 deploy:
-    skip_cleanup: true
-    file_glob: true
-    file: "out/firmware.bin"
-    api_key: "${GITHUB_KEY}"
-    provider: releases
-    overwrite: true
-    on:
-       tags: true
-
-notifications:
-    email: false
+  skip_cleanup: true
+  file_glob: true
+  file:
+    - out/release/*.bin
+    - decode.py
+  api_key: ${GITHUB_KEY}
+  provider: releases
+  overwrite: true
+  on:
+    tags: true
