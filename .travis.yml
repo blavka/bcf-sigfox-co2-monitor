@@ -17,7 +17,7 @@ deploy:
   file_glob: true
   file:
     - out/release/*.bin
-    - decode.py
+    - out/release/*.py
   api_key: ${GITHUB_KEY}
   provider: releases
   overwrite: true
