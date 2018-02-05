@@ -2,9 +2,9 @@
 
 # Firmware for BigClown Sigfox CO2 Monitor
 
-[![Travis](https://img.shields.io/travis/bigclownlabs/bcp-sigfox-co2/master.svg)](https://travis-ci.org/bigclownlabs/bcp-sigfox-co2)
-[![Release](https://img.shields.io/github/release/bigclownlabs/bcp-sigfox-co2.svg)](https://github.com/bigclownlabs/bcp-sigfox-co2/releases)
-[![License](https://img.shields.io/github/license/bigclownlabs/bcp-sigfox-co2.svg)](https://github.com/bigclownlabs/bcp-sigfox-co2/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-sigfox-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-sigfox-co2-monitor)
+[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/releases)
+[![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/BigClownLabs.svg?style=social&label=Follow)](https://twitter.com/BigClownLabs)
 
 ![sigfox-CO2-monitor-with-enclosure](images/sf-co2-enclosure.png)
