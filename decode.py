@@ -19,22 +19,25 @@ def decode(data):
     }
 
     if header & 0x01:
-        ret["temperature"] = int(data[4:6] + data[2:4], 16) / 2.0
+        temperature = int(data[2:6], 16)
+        if temperature > 32768:
+            temperature -= 65536
+        ret["temperature"] = temperature / 32.0
 
     if header & 0x02:
         ret["humidity"] = int(data[6:8], 16) / 2.0
 
     if header & 0x04:
-        ret["pressure"] = int(data[10:12] + data[8:10], 16) * 2.0
+        ret["pressure"] = int(data[8:12], 16) * 2.0
 
     if header & 0x08:
-        ret["co2_concentration_avg"] = int(data[14:16] + data[12:14], 16)
+        ret["co2_concentration_avg"] = int(data[12:16], 16)
 
     if header & 0x10:
-        ret["co2_concentration_median"] = int(data[18:20] + data[16:18], 16)
+        ret["co2_concentration_median"] = int(data[16:20], 16)
 
     if header & 0x20:
-        ret["co2_concentration_raw"] = int(data[22:24] + data[20:22], 16)
+        ret["co2_concentration_raw"] = int(data[20:24], 16)
 
     return ret
 
@@ -42,7 +45,7 @@ def decode(data):
 def pprint(data):
     print('Temperature :', data['temperature'], "°C")
     print('Humidity :', data['humidity'], "%")
-    print('Pressure :', data['pressure'] / 100.0, "hPa")
+    print('Pressure :', data['pressure'] / 100.0 if data['pressure'] else None, "hPa")
     print('CO2 avg :', data['co2_concentration_avg'], "ppm")
     print('CO2 median :', data['co2_concentration_median'], "ppm")
     print('CO2 raw :', data['co2_concentration_raw'], "ppm")
@@ -51,7 +54,7 @@ def pprint(data):
 if __name__ == '__main__':
     if len(sys.argv) != 2 or sys.argv[1] in ('help', '-h', '--help'):
         print("usage: python3 decode.py [data]")
-        print("example: python3 decode.py 3d130000f6c09a0198019401")
+        print("example: python3 decode.py 3f037037c1b003e003e003e0")
         exit(1)
 
     data = decode(sys.argv[1])

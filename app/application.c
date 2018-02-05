@@ -157,7 +157,7 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 
     if (event == BC_BUTTON_EVENT_CLICK)
     {
-        bc_scheduler_plan_now(0);
+        bc_scheduler_plan_now(APPLICATION_TASK_ID);
     }
     else if (event == BC_BUTTON_EVENT_HOLD)
     {
@@ -170,24 +170,23 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 void application_init(void)
 {
     bc_led_init(&led, BC_GPIO_LED, false, false);
+    bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
     bc_module_battery_init(BC_MODULE_BATTERY_FORMAT_STANDARD);
 
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
-    bc_data_stream_init(&stream_temperature_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_temperature_tag);
-    bc_data_stream_init(&stream_barometer_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_barometer_tag);
-    bc_data_stream_init(&stream_humidity_tag, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_humidity_tag);
-    bc_data_stream_init(&stream_co2_concentration, SENSOR_DATA_STREAM_SAMPLES, &stream_buffer_co2_concentration);
+    bc_data_stream_init(&stream_temperature_tag, 1, &stream_buffer_temperature_tag);
+    bc_data_stream_init(&stream_barometer_tag, 1, &stream_buffer_barometer_tag);
+    bc_data_stream_init(&stream_humidity_tag, 1, &stream_buffer_humidity_tag);
+    bc_data_stream_init(&stream_co2_concentration, 1, &stream_buffer_co2_concentration);
 
     bc_module_co2_init();
     bc_module_co2_set_update_interval(SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
     bc_module_co2_set_event_handler(co2_module_event_handler, &stream_co2_concentration);
 
     bc_tag_temperature_init(&temperature_tag_internal, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_ALTERNATE);
-    bc_tag_temperature_set_update_interval(&temperature_tag_internal, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
-    bc_tag_temperature_set_event_handler(&temperature_tag_internal, NULL, NULL);
 
     bc_tag_temperature_init(&temperature_tag, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_DEFAULT);
     bc_tag_temperature_set_update_interval(&temperature_tag, SENSOR_UPDATE_INTERVAL_SECONDS * 1000);
@@ -204,11 +203,22 @@ void application_init(void)
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
     bc_button_set_hold_time(&button, 10000);
     bc_button_set_event_handler(&button, button_event_handler, NULL);
+
+    bc_scheduler_plan_from_now(APPLICATION_TASK_ID, FIRST_REPORT_SECONDS * 1000);
+
+    bc_led_pulse(&led, 2000);
 }
 
 void application_task(void *param)
 {
     (void) param;
+
+    if (!bc_module_sigfox_is_ready(&sigfox_module))
+    {
+        bc_scheduler_plan_current_now();
+
+        return;
+    }
 
     uint8_t header = 0;
     int16_t temperature = 0;
@@ -222,52 +232,58 @@ void application_task(void *param)
 
     if (bc_data_stream_get_average(&stream_temperature_tag, &avarage))
     {
-        header |= 0x01; temperature = avarage * 2;
+        header |= 0x01;
+        temperature = avarage * 32;
     }
 
     if (bc_data_stream_get_average(&stream_humidity_tag, &avarage))
     {
-        header |= 0x02; humidity = avarage * 2;
+        header |= 0x02;
+        humidity = avarage * 2;
     }
 
     if (bc_data_stream_get_average(&stream_barometer_tag, &avarage))
     {
-        header |= 0x04; pressure = avarage / 2;
+        header |= 0x04;
+        pressure = avarage / 2;
     }
 
     if (bc_data_stream_get_average(&stream_co2_concentration, &avarage))
     {
-        header |= 0x08; co2_concentration = avarage;
+        header |= 0x08;
+        co2_concentration = avarage;
     }
 
     float median;
 
     if (bc_data_stream_get_median(&stream_co2_concentration, &median))
     {
-        header |= 0x10; co2_concentration_median = median;
+        header |= 0x10;
+        co2_concentration_median = median;
     }
 
     float raw;
 
     if (bc_data_stream_get_last(&stream_co2_concentration, &raw))
     {
-        header |= 0x20; co2_concentration_raw = raw;
+        header |= 0x20;
+        co2_concentration_raw = raw;
     }
 
     uint8_t buffer[12];
 
     buffer[0] = header;
-    buffer[1] = temperature;
-    buffer[2] = temperature >> 8;
+    buffer[1] = temperature >> 8;
+    buffer[2] = temperature;
     buffer[3] = humidity;
-    buffer[4] = pressure;
-    buffer[5] = pressure >> 8;
-    buffer[6] = co2_concentration;
-    buffer[7] = co2_concentration >> 8;
-    buffer[8] = co2_concentration_median;
-    buffer[9] = co2_concentration_median >> 8;
-    buffer[10] = co2_concentration_raw;
-    buffer[11] = co2_concentration_raw >> 8;
+    buffer[4] = pressure >> 8;
+    buffer[5] = pressure;
+    buffer[6] = co2_concentration >> 8;
+    buffer[7] = co2_concentration;
+    buffer[8] = co2_concentration_median >> 8;
+    buffer[9] = co2_concentration_median;
+    buffer[10] = co2_concentration_raw >> 8;
+    buffer[11] = co2_concentration_raw;
 
     if (bc_module_sigfox_send_rf_frame(&sigfox_module, buffer, sizeof(buffer)))
     {
