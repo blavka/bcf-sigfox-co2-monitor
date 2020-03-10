@@ -1,9 +1,9 @@
 article: https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/blob/master/README.md
 assembly:
-  - name: BigClown Core Module
-  - name: BigClown Sigfox Module
-  - name: BigClown CO2 Module
-  - name: BigClown Mini Battery Module
+  - name: HARDWARIO Core Module
+  - name: HARDWARIO Sigfox Module
+  - name: HARDWARIO CO2 Module
+  - name: HARDWARIO Mini Battery Module
     optional: true
-  - name: BigClown Battery Module
+  - name: HARDWARIO Battery Module
     optional: true    

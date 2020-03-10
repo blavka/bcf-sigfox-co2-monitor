@@ -1,11 +1,11 @@
-<a href="https://www.bigclown.com/"><img src="https://bigclown.sirv.com/logo.png" width="200" alt="BigClown Logo" align="right"></a>
+<a href="https://www.hardwario.com/"><img src="https://www.hardwario.com/ci/assets/hw-logo.svg" width="200" alt="HARDWARIO Logo" align="right"></a>
 
-# Firmware for BigClown Sigfox CO2 Monitor
+# Firmware for HARDWARIO Sigfox CO2 Monitor
 
 [![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-sigfox-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-sigfox-co2-monitor)
 [![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/releases)
 [![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/blob/master/LICENSE)
-[![Twitter](https://img.shields.io/twitter/follow/BigClownLabs.svg?style=social&label=Follow)](https://twitter.com/BigClownLabs)
+[![Twitter](https://img.shields.io/twitter/follow/hardwario_en.svg?style=social&label=Follow)](https://twitter.com/hardwario_en)
 
 ![sigfox-CO2-monitor-with-enclosure](images/sf-co2-enclosure.png)
 
@@ -13,7 +13,7 @@ This repository contains firmware for Sigfox CO2 Monitor.
 Firmware is programmed into [Core Module](https://shop.bigclown.com/core-module).
 Binary version is available in section [Releases](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/releases).
 
-**TODO** > Detailed information about this project can be found in [BigClown Documentation](https://doc.bigclown.com).
+**TODO** > Detailed information about this project can be found in [HARDWARIO Documentation](https://doc.bigclown.com).
 
 **TODO** Link to documentation article
 
