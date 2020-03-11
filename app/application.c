@@ -172,8 +172,6 @@ void application_init(void)
     bc_led_init(&led, BC_GPIO_LED, false, false);
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
-    bc_module_battery_init(BC_MODULE_BATTERY_FORMAT_STANDARD);
-
     bc_module_sigfox_init(&sigfox_module, BC_MODULE_SIGFOX_REVISION_R2);
     bc_module_sigfox_set_event_handler(&sigfox_module, sigfox_module_event_handler, NULL);
 
