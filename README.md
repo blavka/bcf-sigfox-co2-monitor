@@ -2,9 +2,9 @@
 
 # Firmware for HARDWARIO Sigfox CO2 Monitor
 
-[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-sigfox-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-sigfox-co2-monitor)
-[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/releases)
-[![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-sigfox-co2-monitor/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-sigfox-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-sigfox-co2-monitor)
+[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-sigfox-co2-monitor/releases)
+[![License](https://img.shields.io/github/license/bigclownlabs/bcf-sigfox-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-sigfox-co2-monitor/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/hardwario_en.svg?style=social&label=Follow)](https://twitter.com/hardwario_en)
 
 ![sigfox-CO2-monitor-with-enclosure](images/sf-co2-enclosure.png)
